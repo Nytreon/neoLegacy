@@ -41,6 +41,7 @@ public:
 	void setItem(shared_ptr<ItemInstance> item);
 	int getRotation();
 	void setRotation(int rotation);
+	virtual bool hurt(DamageSource *source, float damage) override;
 
 	virtual void addAdditonalSaveData(CompoundTag *tag);
 	virtual void readAdditionalSaveData(CompoundTag *tag);

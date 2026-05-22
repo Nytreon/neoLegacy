@@ -10,7 +10,7 @@
 #include "net.minecraft.world.level.saveddata.h"
 #include "com.mojang.nbt.h"
 #include "ItemFrame.h"
-
+#include "DamageSource.h"
 
 
 
@@ -170,4 +170,42 @@ bool ItemFrame::interact(shared_ptr<Player> player)
 	}
 
 	return true;
+}
+
+bool ItemFrame::hurt(DamageSource *source, float damage)
+{
+    if (level->isClientSide) return false;
+
+    shared_ptr<ItemInstance> item = getItem();
+    
+    if (!source->isExplosion() && item != nullptr)
+    {
+        shared_ptr<Entity> sourceEntity = source->getEntity();
+        
+        if (sourceEntity != nullptr && sourceEntity->instanceof(eTYPE_PLAYER))
+        {
+            shared_ptr<Player> player = dynamic_pointer_cast<Player>(sourceEntity);
+            if (!player->abilities.instabuild)
+            {
+                shared_ptr<ItemInstance> copy = item->copy();
+                removeFramedMap(copy);
+                spawnAtLocation(copy, 0);
+            }
+            else
+            {
+                removeFramedMap(item);
+            }
+        }
+        else
+        {
+            shared_ptr<ItemInstance> copy = item->copy();
+            removeFramedMap(copy);
+            spawnAtLocation(copy, 0);
+        }
+        
+        setItem(nullptr);
+        return true;
+    }
+    
+    return HangingEntity::hurt(source, damage);
 }
