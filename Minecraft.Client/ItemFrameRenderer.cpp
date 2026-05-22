@@ -110,6 +110,7 @@ void ItemFrameRenderer::drawFrame(shared_ptr<ItemFrame> itemFrame)
 
 void ItemFrameRenderer::drawItem(shared_ptr<ItemFrame> entity) 
 {
+
     shared_ptr<ItemInstance> instance = entity->getItem();
     if (instance == nullptr) return;
 
@@ -120,31 +121,32 @@ void ItemFrameRenderer::drawItem(shared_ptr<ItemFrame> entity)
     glPushMatrix();
 
     glRotatef(180.0f + entity->yRot, 0, 1, 0);
-    glTranslatef(0.0f, 0.0f, -0.4375f);
+	glTranslatef(0.0f, 0.0f, -0.4375f);
 
-    int rotation = entity->getRotation();
-    bool isMap = (itemEntity->getItem()->getItem() == Item::map);
-    int effectiveRotation = isMap ? 2 * (rotation % 4) : rotation;
+	int rotation = entity->getRotation();
+	bool isMap = (itemEntity->getItem()->getItem() == Item::map);
+	int effectiveRotation = isMap ? 2 * (rotation % 4) : rotation;
 
-    glRotatef(-45.0f * effectiveRotation, 0, 0, 1);
-    glTranslatef(0.0f, -0.452f / 2, 0.0f);
+	glRotatef(-45.0f * effectiveRotation, 0, 0, 1);
+	glTranslatef(0.0f, -0.41f/2, 0.0f);  
 
     if (isMap) 
     {
-        entityRenderDispatcher->textures->bindTexture(&MAP_BACKGROUND_LOCATION);
-        Tesselator *t = Tesselator::getInstance();
+        //entityRenderDispatcher->textures->bindTexture(&MAP_BACKGROUND_LOCATION);
+        //Tesselator *t = Tesselator::getInstance();
 
+        glRotatef(180, 0, 1, 0);
         glRotatef(180, 0, 0, 1);
-        glScalef(0.0078125f, 0.0078125f, 0.0078125f);
-        glTranslatef(-64.0f, -64.0f, 0.0f);
+        glScalef(1.0f / 128.0f, 1.0f / 128.0f, 1.0f / 128.0f);
+        glTranslatef(-64.0f, -87.0f, -3.0f);
 
-        glNormal3f(0, 0, -1);
-        t->begin();
-        t->vertexUV(0.0f,   128.0f, 0.0f, 0.0f, 1.0f);
-        t->vertexUV(128.0f, 128.0f, 0.0f, 1.0f, 1.0f);
-        t->vertexUV(128.0f, 0.0f,   0.0f, 1.0f, 0.0f);
-        t->vertexUV(0.0f,   0.0f,   0.0f, 0.0f, 0.0f);
-        t->end();
+        //glNormal3f(0, 0, -1);
+        //t->begin();
+        //t->vertexUV(0.0f,   128.0f, 0.0f, 0.0f, 1.0f);
+        //t->vertexUV(128.0f, 128.0f, 0.0f, 1.0f, 1.0f);
+        //t->vertexUV(128.0f, 0.0f,   0.0f, 1.0f, 0.0f);
+        //t->vertexUV(0.0f,   0.0f,   0.0f, 0.0f, 0.0f);
+        //t->end();
 
         shared_ptr<MapItemSavedData> data = Item::map->getSavedData(itemEntity->getItem(), entity->level);
         if (data != nullptr) 
@@ -179,3 +181,4 @@ void ItemFrameRenderer::drawItem(shared_ptr<ItemFrame> entity)
 
     glPopMatrix();
 }
+
