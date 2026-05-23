@@ -11,6 +11,7 @@
 #include "com.mojang.nbt.h"
 #include "ItemFrame.h"
 #include "DamageSource.h"
+#include "Level.h"
 
 
 
@@ -87,28 +88,51 @@ shared_ptr<ItemInstance> ItemFrame::getItem()
 	return getEntityData()->getItemInstance(DATA_ITEM);
 }
 
-void ItemFrame::setItem(shared_ptr<ItemInstance> item) 
+void ItemFrame::setItem(shared_ptr<ItemInstance> item, bool notifyNeighbors)
 {
-	if(item != nullptr)
-	{
-		item = item->copy();
-		item->count = 1;
+    if (item != nullptr)
+    {
+        item = item->copy();
+        item->count = 1;
+        item->setFramed(dynamic_pointer_cast<ItemFrame>(shared_from_this()));
+    }
+    getEntityData()->set(DATA_ITEM, item);
+    getEntityData()->markDirty(DATA_ITEM);
 
-		item->setFramed(dynamic_pointer_cast<ItemFrame>( shared_from_this() ));
-	}
-	getEntityData()->set(DATA_ITEM, item);
-	getEntityData()->markDirty(DATA_ITEM);
+    if (notifyNeighbors)
+    {
+        level->updateNeighbourForOutputSignal(xTile, yTile, zTile, Tile::comparator_off->id);
+    }
 }
 
-int ItemFrame::getRotation() 
+void ItemFrame::setItem(shared_ptr<ItemInstance> item)
 {
-	return getEntityData()->getByte(DATA_ROTATION);
+    setItem(item, true);
 }
 
-void ItemFrame::setRotation(int rotation) 
+int ItemFrame::getRotation()
 {
-	getEntityData()->set(DATA_ROTATION, static_cast<byte>(rotation % 8));
+    return getEntityData()->getByte(DATA_ROTATION);
 }
+
+void ItemFrame::setRotation(int rotation, bool notifyNeighbors)
+{
+    getEntityData()->set(DATA_ROTATION, static_cast<byte>(rotation % 8));
+
+    if (notifyNeighbors)
+    {
+        level->updateNeighbourForOutputSignal(xTile, yTile, zTile, Tile::comparator_off->id);
+    }
+}
+
+void ItemFrame::setRotation(int rotation)
+{
+    
+    getEntityData()->set(DATA_ROTATION, static_cast<byte>(rotation % 8));
+    level->updateNeighbourForOutputSignal(xTile, yTile, zTile, Tile::comparator_off->id);
+}
+
+
 
 void ItemFrame::addAdditonalSaveData(CompoundTag *tag) 
 {
@@ -208,4 +232,17 @@ bool ItemFrame::hurt(DamageSource *source, float damage)
     }
     
     return HangingEntity::hurt(source, damage);
+}
+
+int ItemFrame::getAnalogOutput()
+{
+    shared_ptr<ItemInstance> item = getItem();
+    if (item == nullptr) return 0;
+    return getRotation() % 8 + 1;
+}
+
+
+float ItemFrame::getPickRadius()
+{
+	return 0.0f;
 }
